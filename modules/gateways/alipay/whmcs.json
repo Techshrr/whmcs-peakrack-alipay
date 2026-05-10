@@ -1,0 +1,29 @@
+{
+  "schema": "1.0",
+  "type": "whmcs-gateways",
+  "name": "alipay",
+  "license": "proprietary",
+  "category": "payments",
+  "description": {
+    "name": "Alipay (支付宝)",
+    "tagline": "Accept CNY payments through Alipay PC website payment.",
+    "long": "A WHMCS third-party payment gateway for Alipay Open Platform PC website payment. It supports RSA2 signing, asynchronous notifications, and WHMCS currency conversion to CNY.",
+    "features": [
+      "Alipay Open Platform public-key mode with RSA2",
+      "PC website payment via alipay.trade.page.pay",
+      "CNY amount verification for converted WHMCS invoices"
+    ]
+  },
+  "logo": {
+    "filename": "logo.png"
+  },
+  "support": {
+    "homepage": "https://open.alipay.com/",
+    "docs_url": "https://opendocs.alipay.com/apis/api_1/alipay.trade.page.pay"
+  },
+  "authors": [
+    {
+      "name": "PeakRack Custom Module"
+    }
+  ]
+}

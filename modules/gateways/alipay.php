@@ -1,0 +1,189 @@
+<?php
+
+if (!defined("WHMCS")) {
+    die("This file cannot be accessed directly");
+}
+
+require_once __DIR__ . '/alipay/lib.php';
+
+function alipay_MetaData()
+{
+    return [
+        'DisplayName' => 'Alipay (支付宝)',
+        'APIVersion' => '1.1',
+    ];
+}
+
+function alipay_config()
+{
+    return [
+        'FriendlyName' => [
+            'Type' => 'System',
+            'Value' => 'Alipay (支付宝)',
+        ],
+        'appId' => [
+            'FriendlyName' => 'App ID',
+            'Type' => 'text',
+            'Size' => '32',
+            'Default' => '',
+            'Description' => '支付宝开放平台应用 App ID / Alipay Open Platform application ID.',
+        ],
+        'merchantPrivateKey' => [
+            'FriendlyName' => '应用私钥 / Application Private Key',
+            'Type' => 'textarea',
+            'Rows' => '10',
+            'Cols' => '80',
+            'Default' => '',
+            'Description' => '普通公钥模式的应用私钥，支持 PEM 头尾或密钥正文。请勿填写应用公钥 / Use the application private key, not the application public key.',
+        ],
+        'alipayPublicKey' => [
+            'FriendlyName' => '支付宝公钥 / Alipay Public Key',
+            'Type' => 'textarea',
+            'Rows' => '8',
+            'Cols' => '80',
+            'Default' => '',
+            'Description' => '支付宝开放平台提供的支付宝公钥，不是应用公钥 / Use the Alipay public key from the Open Platform.',
+        ],
+        'sellerId' => [
+            'FriendlyName' => 'Seller ID / PID',
+            'Type' => 'text',
+            'Size' => '32',
+            'Default' => '',
+            'Description' => '可选。填写 2088 开头的收款账号 PID 后，回调会校验 seller_id / Optional payee PID validation.',
+        ],
+        'orderPrefix' => [
+            'FriendlyName' => '订单号前缀 / Order Prefix',
+            'Type' => 'text',
+            'Size' => '20',
+            'Default' => 'WHMCS_',
+            'Description' => '只允许字母、数字和下划线。多个站点共用同一支付宝应用时请设置不同前缀 / Letters, numbers, and underscores only.',
+        ],
+        'productCode' => [
+            'FriendlyName' => 'Product Code',
+            'Type' => 'text',
+            'Size' => '30',
+            'Default' => 'FAST_INSTANT_TRADE_PAY',
+            'Description' => '电脑网站支付通常固定为 FAST_INSTANT_TRADE_PAY / Usually fixed for PC website payment.',
+        ],
+        'timeoutExpress' => [
+            'FriendlyName' => '支付超时 / Payment Timeout',
+            'Type' => 'text',
+            'Size' => '8',
+            'Default' => '30m',
+            'Description' => '支付宝订单过期时间，例如 30m、2h、1d / Alipay order timeout.',
+        ],
+        'sandbox' => [
+            'FriendlyName' => '沙箱模式 / Sandbox Mode',
+            'Type' => 'yesno',
+            'Description' => '勾选后使用支付宝沙箱网关。沙箱必须使用沙箱 App ID 和沙箱公钥 / Use sandbox credentials when enabled.',
+        ],
+        'verifyAmount' => [
+            'FriendlyName' => '校验金额 / Verify Amount',
+            'Type' => 'yesno',
+            'Default' => 'on',
+            'Description' => '建议开启。回调入账前校验支付宝返回的 CNY 金额是否等于发起支付时的 CNY 金额 / Recommended.',
+        ],
+    ];
+}
+
+function alipay_link($params)
+{
+    if (!extension_loaded('openssl')) {
+        return whmcs_alipay_alert('danger', whmcs_alipay_lang('openssl_missing', $params));
+    }
+
+    foreach (['appId', 'merchantPrivateKey', 'alipayPublicKey'] as $requiredField) {
+        if (empty($params[$requiredField])) {
+            return whmcs_alipay_alert(
+                'warning',
+                whmcs_alipay_lang('missing_config', $params, ['field' => $requiredField])
+            );
+        }
+    }
+
+    $invoiceId = (int) $params['invoiceid'];
+    $amount = whmcs_alipay_format_amount($params['amount']);
+
+    if ((float) $amount < 0.01) {
+        return whmcs_alipay_alert('warning', whmcs_alipay_lang('min_amount', $params));
+    }
+
+    $currency = strtoupper((string) ($params['currency'] ?? ''));
+    if ($currency !== '' && $currency !== 'CNY') {
+        return whmcs_alipay_alert(
+            'warning',
+            whmcs_alipay_lang('currency_error', $params, ['currency' => $currency])
+        );
+    }
+
+    $callbackUrl = rtrim($params['systemurl'], '/') . '/modules/gateways/callback/alipay.php';
+    $returnUrl = $callbackUrl . '?return=1';
+    $outTradeNo = whmcs_alipay_out_trade_no($invoiceId, $params['orderPrefix'] ?? 'WHMCS_');
+    $productCode = trim((string) ($params['productCode'] ?? 'FAST_INSTANT_TRADE_PAY')) ?: 'FAST_INSTANT_TRADE_PAY';
+    $invoiceLabel = whmcs_alipay_clean_display_text(
+        $params['companyname'] . ' - Invoice #' . ($params['invoicenum'] ?: $invoiceId)
+    );
+    $itemSummary = whmcs_alipay_invoice_item_summary($invoiceId);
+    $firstItem = whmcs_alipay_clean_display_text($itemSummary['first_item'], $invoiceLabel);
+    $itemCount = (int) $itemSummary['item_count'];
+    $subject = whmcs_alipay_truncate($firstItem, 256);
+    $bodySuffix = $itemCount > 1 ? ' - ' . $itemCount . ' items' : '';
+    $body = whmcs_alipay_truncate($invoiceLabel . $bodySuffix, 128);
+
+    $bizContent = [
+        'out_trade_no' => $outTradeNo,
+        'product_code' => $productCode,
+        'total_amount' => $amount,
+        'subject' => $subject,
+        'body' => $body,
+        'passback_params' => rawurlencode(http_build_query(
+            [
+                'invoiceid' => $invoiceId,
+                'expected_amount' => $amount,
+                'expected_currency' => 'CNY',
+            ],
+            '',
+            '&',
+            PHP_QUERY_RFC3986
+        )),
+    ];
+
+    $timeoutExpress = trim((string) ($params['timeoutExpress'] ?? ''));
+    if ($timeoutExpress !== '') {
+        $bizContent['timeout_express'] = $timeoutExpress;
+    }
+
+    $requestParams = [
+        'app_id' => trim((string) $params['appId']),
+        'method' => 'alipay.trade.page.pay',
+        'format' => 'JSON',
+        'charset' => 'utf-8',
+        'sign_type' => 'RSA2',
+        'timestamp' => date('Y-m-d H:i:s'),
+        'version' => '1.0',
+        'notify_url' => $callbackUrl,
+        'return_url' => $returnUrl,
+        'biz_content' => json_encode($bizContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+    ];
+
+    try {
+        $requestParams['sign'] = whmcs_alipay_sign($requestParams, $params['merchantPrivateKey']);
+    } catch (Throwable $e) {
+        return whmcs_alipay_alert(
+            'danger',
+            whmcs_alipay_lang('signing_failed', $params, ['message' => $e->getMessage()])
+        );
+    }
+
+    $gatewayUrl = whmcs_alipay_gateway_url(!empty($params['sandbox']) && $params['sandbox'] === 'on');
+    $iconUrl = rtrim($params['systemurl'], '/') . '/modules/gateways/alipay/logo-icon.png';
+    $buttonLabel = whmcs_alipay_lang('pay_button', $params);
+
+    return '<form method="post" action="' . htmlspecialchars($gatewayUrl, ENT_QUOTES, 'UTF-8') . '">' . "\n"
+        . whmcs_alipay_render_hidden_inputs($requestParams)
+        . '<button type="submit" class="btn btn-primary">'
+        . '<img src="' . htmlspecialchars($iconUrl, ENT_QUOTES, 'UTF-8') . '" alt="" style="height:20px;width:20px;margin-right:6px;vertical-align:text-bottom;">'
+        . htmlspecialchars($buttonLabel, ENT_QUOTES, 'UTF-8')
+        . '</button>' . "\n"
+        . '</form>';
+}
