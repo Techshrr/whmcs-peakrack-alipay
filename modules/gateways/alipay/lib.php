@@ -185,6 +185,21 @@ function whmcs_alipay_verify(array $params, $publicKey)
     return false;
 }
 
+function whmcs_alipay_return_token($invoiceId, $amount, $privateKey)
+{
+    $secret = hash('sha256', whmcs_alipay_clean_key($privateKey));
+    $payload = (int) $invoiceId . '|' . whmcs_alipay_format_amount($amount);
+
+    return hash_hmac('sha256', $payload, $secret);
+}
+
+function whmcs_alipay_return_token_is_valid($invoiceId, $amount, $token, $privateKey)
+{
+    $expected = whmcs_alipay_return_token($invoiceId, $amount, $privateKey);
+
+    return is_string($token) && hash_equals($expected, $token);
+}
+
 function whmcs_alipay_format_amount($amount)
 {
     return number_format((float) $amount, 2, '.', '');

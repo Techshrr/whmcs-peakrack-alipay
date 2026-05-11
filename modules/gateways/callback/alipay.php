@@ -62,10 +62,17 @@ function whmcs_alipay_callback_invoice_balance($invoiceId)
 }
 
 $isReturn = isset($_GET['return']);
+$returnExpectedAmount = isset($_GET['expected_amount']) ? whmcs_alipay_format_amount($_GET['expected_amount']) : null;
+$returnToken = (string) ($_GET['return_token'] ?? '');
 $requestParams = $_POST ?: $_GET;
 unset($requestParams['return']);
+unset($requestParams['expected_amount'], $requestParams['return_token']);
 
 $safeLogData = $requestParams;
+$safeLogData['callback_mode'] = $isReturn ? 'return' : 'notify';
+if ($returnExpectedAmount !== null) {
+    $safeLogData['return_expected_amount'] = $returnExpectedAmount;
+}
 $invoiceId = 0;
 
 if (empty($requestParams)) {
@@ -96,8 +103,18 @@ $transactionId = (string) ($requestParams['trade_no'] ?? '');
 $paymentAmount = whmcs_alipay_format_amount($requestParams['total_amount'] ?? $requestParams['total_fee'] ?? 0);
 $tradeStatus = (string) ($requestParams['trade_status'] ?? '');
 $isPaidNotification = in_array($tradeStatus, ['TRADE_SUCCESS', 'TRADE_FINISHED'], true);
+$isSignedReturnPayment = false;
 
-if (!$isPaidNotification) {
+if (!$isPaidNotification && $isReturn && $tradeStatus === '' && $transactionId !== '' && (float) $paymentAmount > 0) {
+    if ($returnExpectedAmount !== null && whmcs_alipay_return_token_is_valid($invoiceId, $returnExpectedAmount, $returnToken, $gatewayParams['merchantPrivateKey'] ?? '')) {
+        $isSignedReturnPayment = true;
+        $safeLogData['return_payment_fallback'] = 'accepted';
+    } else {
+        $safeLogData['return_payment_fallback'] = 'missing_or_invalid_token';
+    }
+}
+
+if (!$isPaidNotification && !$isSignedReturnPayment) {
     logTransaction($gatewayModuleName, $safeLogData, 'Ignored Status: ' . ($tradeStatus ?: 'return'));
     whmcs_alipay_callback_finish($isReturn, $gatewayParams, $invoiceId, 'success');
 }
@@ -117,6 +134,9 @@ if (($gatewayParams['verifyAmount'] ?? '') === 'on') {
     $expectedAmount = isset($passback['expected_amount'])
         ? whmcs_alipay_format_amount($passback['expected_amount'])
         : null;
+    if ($expectedAmount === null && $isSignedReturnPayment && $returnExpectedAmount !== null) {
+        $expectedAmount = $returnExpectedAmount;
+    }
 
     if ($expectedAmount !== null && !whmcs_alipay_amounts_match($expectedAmount, $paymentAmount)) {
         $safeLogData['expected_gateway_amount'] = $expectedAmount;
@@ -141,7 +161,7 @@ if (whmcs_alipay_callback_transaction_exists($transactionId)) {
 
 checkCbTransID($transactionId);
 
-logTransaction($gatewayModuleName, $safeLogData, 'Successful');
+logTransaction($gatewayModuleName, $safeLogData, $isSignedReturnPayment ? 'Successful Return' : 'Successful');
 addInvoicePayment(
     $invoiceId,
     $transactionId,

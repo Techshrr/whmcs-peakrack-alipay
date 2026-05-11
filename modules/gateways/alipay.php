@@ -117,7 +117,8 @@ function alipay_link($params)
     }
 
     $callbackUrl = rtrim($params['systemurl'], '/') . '/modules/gateways/callback/alipay.php';
-    $returnUrl = $callbackUrl . '?return=1';
+    $returnToken = whmcs_alipay_return_token($invoiceId, $amount, $params['merchantPrivateKey']);
+    $returnUrl = $callbackUrl . '?return=1&expected_amount=' . rawurlencode($amount) . '&return_token=' . rawurlencode($returnToken);
     $outTradeNo = whmcs_alipay_out_trade_no($invoiceId, $params['orderPrefix'] ?? 'WHMCS_');
     $productCode = trim((string) ($params['productCode'] ?? 'FAST_INSTANT_TRADE_PAY')) ?: 'FAST_INSTANT_TRADE_PAY';
     $invoiceLabel = whmcs_alipay_clean_display_text(
@@ -163,7 +164,7 @@ function alipay_link($params)
         'version' => '1.0',
         'notify_url' => $callbackUrl,
         'return_url' => $returnUrl,
-        'biz_content' => json_encode($bizContent, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        'biz_content' => json_encode($bizContent, JSON_UNESCAPED_SLASHES),
     ];
 
     try {
@@ -179,7 +180,7 @@ function alipay_link($params)
     $iconUrl = rtrim($params['systemurl'], '/') . '/modules/gateways/alipay/logo-icon.png';
     $buttonLabel = whmcs_alipay_lang('pay_button', $params);
 
-    return '<form method="post" action="' . htmlspecialchars($gatewayUrl, ENT_QUOTES, 'UTF-8') . '">' . "\n"
+    return '<form method="post" accept-charset="UTF-8" action="' . htmlspecialchars($gatewayUrl, ENT_QUOTES, 'UTF-8') . '">' . "\n"
         . whmcs_alipay_render_hidden_inputs($requestParams)
         . '<button type="submit" class="btn btn-primary">'
         . '<img src="' . htmlspecialchars($iconUrl, ENT_QUOTES, 'UTF-8') . '" alt="" style="height:20px;width:20px;margin-right:6px;vertical-align:text-bottom;">'
