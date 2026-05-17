@@ -1,4 +1,4 @@
-# WHMCS 支付宝支付网关
+# WHMCS PeakRack 支付宝支付网关
 
 用于 WHMCS 9.x 的支付宝电脑网站支付网关模块，支持 `alipay.trade.page.pay`、RSA2 签名、异步通知回调，以及 WHMCS 多货币转换为人民币支付。
 
@@ -27,7 +27,19 @@ English documentation: [README.md](README.md)
 
 ## 安装
 
-把本仓库里的 `modules` 文件夹上传到 WHMCS 根目录。
+仓库根目录保留说明文档，真正用于上传部署的文件放在 `whmcs-peakrack-alipay` 发布目录中：
+
+```text
+whmcs-peakrack-alipay/
+  modules/
+    gateways/
+```
+
+把这个路径上传到 WHMCS 根目录：
+
+```text
+whmcs-peakrack-alipay/modules
+```
 
 上传后应包含：
 
@@ -106,6 +118,13 @@ WHMCS 默认 `standard_cart` 订单模板的支付方式选择列表只输出支
 - 增加带签名的同步返回处理，让客户浏览器返回后更可靠地刷新 WHMCS 发票状态。
 - 优化支付宝页面展示文字的 UTF-8 处理。
 - 将发布包元数据统一标记为 MIT 开源协议。
+
+### 1.1.1
+
+- 将发布包命名统一为 `whmcs-peakrack-alipay`。
+- 将可部署文件统一放到 `whmcs-peakrack-alipay/modules`，方便和其他 WHMCS 支付网关仓库保持一致。
+
+详细升级说明见 [UPGRADE.zh-CN.md](UPGRADE.zh-CN.md)。
 
 ## 免责声明
 

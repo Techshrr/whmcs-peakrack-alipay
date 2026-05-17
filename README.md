@@ -1,4 +1,4 @@
-# WHMCS Alipay Gateway
+# WHMCS PeakRack Alipay Gateway
 
 WHMCS Alipay payment gateway for `alipay.trade.page.pay`, with RSA2 signing, asynchronous callback handling, and WHMCS currency conversion to CNY.
 
@@ -26,7 +26,19 @@ This module uses Alipay public-key mode. Certificate mode is not implemented.
 
 ## Installation
 
-Upload the `modules` folder to your WHMCS root directory.
+The repository keeps documentation at the root and deployable files inside the `whmcs-peakrack-alipay` package directory:
+
+```text
+whmcs-peakrack-alipay/
+  modules/
+    gateways/
+```
+
+Upload or copy this directory to your WHMCS root:
+
+```text
+whmcs-peakrack-alipay/modules
+```
 
 Expected files after upload:
 
@@ -91,6 +103,13 @@ Default WHMCS `standard_cart` payment method radio lists do not automatically re
 - Added signed return handling so successful browser returns can refresh WHMCS invoice state more reliably.
 - Improved UTF-8 handling for Alipay display text.
 - Marked package metadata as MIT for open-source release.
+
+### 1.1.1
+
+- Renamed the release package to `whmcs-peakrack-alipay`.
+- Normalized the deployable files under `whmcs-peakrack-alipay/modules` for consistent WHMCS gateway releases.
+
+Detailed upgrade notes: [UPGRADE.md](UPGRADE.md).
 
 ## Disclaimer
 
