@@ -11,7 +11,7 @@ WHMCS Alipay payment gateway for `alipay.trade.page.pay`, with RSA2 signing, asy
 - WHMCS invoice payment callback integration
 - CNY gateway amount verification for converted invoices
 - Supports WHMCS `Convert To For Processing = CNY`
-- Bilingual admin field descriptions
+- Sectioned gateway configuration UI with a Chinese/English admin language selector
 - Chinese/English customer-facing button and error messages
 - Gateway logo metadata and invoice payment button icon
 
@@ -57,6 +57,7 @@ Then enable `Alipay (支付宝)` in WHMCS payment gateways.
 
 Fill in the gateway settings:
 
+- `Admin Language`, save after selecting `zh` or `en`
 - `App ID`
 - `Application Private Key`
 - `Alipay Public Key`
@@ -108,6 +109,12 @@ Default WHMCS `standard_cart` payment method radio lists do not automatically re
 
 - Renamed the release package to `whmcs-peakrack-alipay`.
 - Normalized the deployable files under `whmcs-peakrack-alipay/modules` for consistent WHMCS gateway releases.
+
+### 1.1.2
+
+- Added a sectioned WHMCS gateway configuration UI.
+- Added a saved Chinese/English admin language selector for gateway configuration labels.
+- Kept payment request, callback, and invoice application logic unchanged.
 
 Detailed upgrade notes: [UPGRADE.md](UPGRADE.md).
 

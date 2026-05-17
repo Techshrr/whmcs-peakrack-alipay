@@ -12,7 +12,7 @@ English documentation: [README.md](README.md)
 - 支持 WHMCS `Convert To For Processing = CNY`
 - 支持 USD 默认货币、CNY 支付处理
 - 支付宝返回金额校验
-- 后台配置项中英双语
+- 后台配置页分区展示，并可选择中文/英文后台语言
 - 客户前台按钮和错误提示中英文切换
 - 包含 WHMCS 网关 logo 和支付按钮图标
 
@@ -58,6 +58,7 @@ modules/gateways/callback/alipay.php
 
 填写以下字段：
 
+- `后台语言 / Admin Language`，选择 `zh` 或 `en` 后先保存
 - `App ID`
 - `应用私钥 / Application Private Key`
 - `支付宝公钥 / Alipay Public Key`
@@ -123,6 +124,12 @@ WHMCS 默认 `standard_cart` 订单模板的支付方式选择列表只输出支
 
 - 将发布包命名统一为 `whmcs-peakrack-alipay`。
 - 将可部署文件统一放到 `whmcs-peakrack-alipay/modules`，方便和其他 WHMCS 支付网关仓库保持一致。
+
+### 1.1.2
+
+- 优化 WHMCS 支付网关后台配置 UI，增加分区说明。
+- 增加可保存的后台语言选择项，配置字段可按中文或英文显示。
+- 支付请求、回调验签和发票入账逻辑保持不变。
 
 详细升级说明见 [UPGRADE.zh-CN.md](UPGRADE.zh-CN.md)。
 

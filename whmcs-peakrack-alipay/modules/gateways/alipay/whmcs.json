@@ -2,7 +2,7 @@
   "schema": "1.0",
   "type": "whmcs-gateways",
   "name": "alipay",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "license": "MIT",
   "category": "payments",
   "description": {
@@ -12,6 +12,7 @@
     "features": [
       "Alipay Open Platform public-key mode with RSA2",
       "PC website payment via alipay.trade.page.pay",
+      "Localized WHMCS gateway configuration labels for Chinese and English admins",
       "CNY amount verification for converted WHMCS invoices"
     ]
   },

@@ -1,5 +1,13 @@
 # Upgrade Notes
 
+## 1.1.2
+
+- Added a sectioned native WHMCS gateway configuration UI.
+- Added a saved `Admin Language` selector for Chinese or English configuration labels.
+- No database migration is required. WHMCS will store the new `adminLanguage` gateway setting after you save the gateway configuration once.
+- Existing live credentials, callbacks, and invoice payment behavior are unchanged.
+- Package metadata version bumped to `1.1.2`.
+
 ## 1.1.1
 
 - Repository layout only: deployable files now live under `whmcs-peakrack-alipay/modules`.
