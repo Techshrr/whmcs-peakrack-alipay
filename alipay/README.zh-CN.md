@@ -36,7 +36,7 @@ https://你的WHMCS域名/modules/gateways/callback/alipay.php
 
 在 `系统设置 > 支付网关` 中启用 `Alipay (支付宝)`，填写：
 
-- 使用配置页右上角 `中文 / English` 按钮切换后台字段语言
+- 使用 `后台语言 / Admin Language` 选择项切换后台字段语言；如果 WHMCS 允许描述渲染 HTML，也会显示中文 / English 快速切换按钮
 - `App ID`
 - `应用私钥 / Application Private Key`
 - `支付宝公钥 / Alipay Public Key`

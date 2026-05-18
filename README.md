@@ -11,7 +11,7 @@ WHMCS Alipay payment gateway for `alipay.trade.page.pay`, with RSA2 signing, asy
 - WHMCS invoice payment callback integration
 - CNY gateway amount verification for converted invoices
 - Supports WHMCS `Convert To For Processing = CNY`
-- Sectioned gateway configuration UI with Risk-style Chinese/English admin language buttons
+- Sectioned gateway configuration UI with a visible Admin Language selector and optional inline Chinese/English switch links
 - Chinese/English customer-facing button and error messages
 - Gateway logo metadata and invoice payment button icon
 
@@ -92,6 +92,11 @@ This display text does not control payment allocation or provisioning. WHMCS pro
 Default WHMCS `standard_cart` payment method radio lists do not automatically render gateway logos. The included `logo.png` is available for WHMCS gateway metadata, and `logo-icon.png` is used inside the invoice payment button.
 
 ## Release Notes
+
+### 1.1.4
+
+- Added a visible Admin Language setting for WHMCS payment gateway configuration pages.
+- Kept inline language switch links as an optional HTML-description enhancement.
 
 ### 1.1.0
 

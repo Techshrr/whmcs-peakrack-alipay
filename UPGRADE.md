@@ -1,5 +1,11 @@
 # Upgrade Notes
 
+## 1.1.4
+
+- Added a visible `Admin Language` gateway setting so the language control appears even when WHMCS does not render custom `System` gateway fields.
+- Kept inline Chinese / English switch links beside the language setting when WHMCS allows HTML descriptions.
+- Package metadata version bumped to `1.1.4`.
+
 ## 1.1.3
 
 - Repository layout only: gateway files now live at repository root as `alipay.php`, `alipay/`, and `callback/alipay.php`.

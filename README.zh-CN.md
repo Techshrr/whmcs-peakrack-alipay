@@ -12,7 +12,7 @@ English documentation: [README.md](README.md)
 - 支持 WHMCS `Convert To For Processing = CNY`
 - 支持 USD 默认货币、CNY 支付处理
 - 支付宝返回金额校验
-- 后台配置页分区展示，并提供 Risk 风格的中文/英文后台语言按钮
+- 后台配置页分区展示，并提供可见的后台语言选择项和可选中文/English 快速切换按钮
 - 客户前台按钮和错误提示中英文切换
 - 包含 WHMCS 网关 logo 和支付按钮图标
 
@@ -107,6 +107,11 @@ https://你的WHMCS域名/modules/gateways/callback/alipay.php
 WHMCS 默认 `standard_cart` 订单模板的支付方式选择列表只输出支付方式名称，不会自动读取网关 logo。要在结账页单选支付方式处显示图标，需要额外修改订单模板。
 
 ## 更新记录
+
+### 1.1.4
+
+- 增加可见的 `后台语言 / Admin Language` 网关配置项，确保 WHMCS 支付网关配置页一定能看到语言控制。
+- 保留中文 / English 快速切换按钮；如果当前 WHMCS 后台允许描述渲染 HTML，会显示在语言设置旁边。
 
 ### 1.1.0
 

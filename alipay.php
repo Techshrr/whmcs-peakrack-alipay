@@ -59,10 +59,12 @@ function whmcs_alipay_admin_text(string $language, string $key): string
     $texts = [
         'zh' => [
             'admin_title' => 'Alipay 支付网关配置',
-            'admin_subtitle' => '用于支付宝开放平台电脑网站支付。点击右上角语言按钮可立即切换后台配置显示语言。',
-            'version_badge' => '版本 1.1.3',
+            'admin_subtitle' => '用于支付宝开放平台电脑网站支付。支付网关配置页由 WHMCS 字段渲染；可使用“后台语言”下拉框保存切换，或点击旁边按钮临时切换。',
+            'version_badge' => '版本 1.1.4',
             'language_zh' => '中文',
             'language_en' => 'English',
+            'admin_language' => '后台语言',
+            'admin_language_desc' => '选择后保存配置即可长期切换；右侧按钮可临时切换当前页面。',
             'credentials_title' => '开放平台凭据',
             'credentials_desc' => '填写支付宝开放平台应用信息。应用私钥和支付宝公钥必须来自同一个应用和同一种密钥模式。',
             'order_title' => '订单与显示',
@@ -92,10 +94,12 @@ function whmcs_alipay_admin_text(string $language, string $key): string
         ],
         'en' => [
             'admin_title' => 'Alipay Gateway Configuration',
-            'admin_subtitle' => 'Configure Alipay Open Platform PC website payment. Use the language buttons in the top-right corner to switch this admin page immediately.',
-            'version_badge' => 'Version 1.1.3',
+            'admin_subtitle' => 'Configure Alipay Open Platform PC website payment. WHMCS renders payment gateway settings as fields; use the Admin Language dropdown and save, or use the adjacent buttons for a temporary switch.',
+            'version_badge' => 'Version 1.1.4',
             'language_zh' => '中文',
             'language_en' => 'English',
+            'admin_language' => 'Admin Language',
+            'admin_language_desc' => 'Save this setting for a persistent switch; use the buttons on the right for a temporary switch on the current page.',
             'credentials_title' => 'Open Platform Credentials',
             'credentials_desc' => 'Enter the Alipay Open Platform application credentials. The application private key and Alipay public key must belong to the same app and key mode.',
             'order_title' => 'Order and Display',
@@ -140,6 +144,18 @@ function whmcs_alipay_admin_system(string $html): array
         'Type' => 'System',
         'Value' => $html,
     ];
+}
+
+function whmcs_alipay_admin_language_links(string $language): string
+{
+    $zhUrl = whmcs_alipay_admin_e(whmcs_alipay_admin_language_url('zh'));
+    $enUrl = whmcs_alipay_admin_e(whmcs_alipay_admin_language_url('en'));
+    $base = 'display:inline-block;margin-left:6px;padding:3px 8px;border:1px solid #cfd8e3;border-radius:4px;text-decoration:none;font-size:12px;font-weight:700;';
+    $inactive = $base . 'background:#fff;color:#475569;';
+    $active = $base . 'background:#2563eb;color:#fff;';
+
+    return '<a style="' . ($language === 'zh' ? $active : $inactive) . '" href="' . $zhUrl . '">中文</a>'
+        . '<a style="' . ($language === 'en' ? $active : $inactive) . '" href="' . $enUrl . '">English</a>';
 }
 
 function whmcs_alipay_admin_language_url(string $language): string
@@ -199,6 +215,13 @@ function alipay_config()
         'FriendlyName' => [
             'Type' => 'System',
             'Value' => 'Alipay (支付宝)',
+        ],
+        'adminLanguage' => [
+            'FriendlyName' => $t('admin_language'),
+            'Type' => 'dropdown',
+            'Options' => 'zh,en',
+            'Default' => $language,
+            'Description' => $t('admin_language_desc') . whmcs_alipay_admin_language_links($language),
         ],
         'adminUiIntro' => whmcs_alipay_admin_intro($language),
         'credentialsSection' => whmcs_alipay_admin_section($language, 'credentials_title', 'credentials_desc'),
