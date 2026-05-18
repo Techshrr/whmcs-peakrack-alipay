@@ -1,5 +1,13 @@
 # Upgrade Notes
 
+## 1.1.3
+
+- Repository layout only: gateway files now live at repository root as `alipay.php`, `alipay/`, and `callback/alipay.php`.
+- Existing WHMCS installs do not need database changes for this release.
+- When updating manually, copy `alipay.php` and `alipay/` to `modules/gateways/`, and copy `callback/alipay.php` to `modules/gateways/callback/alipay.php`.
+- Replaced the saved admin-language dropdown with Risk-style language buttons that switch immediately and persist in the admin browser.
+- Package metadata version bumped to `1.1.3`.
+
 ## 1.1.2
 
 - Added a sectioned native WHMCS gateway configuration UI.

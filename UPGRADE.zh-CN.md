@@ -1,5 +1,13 @@
 # 升级说明
 
+## 1.1.3
+
+- 仅调整仓库展示结构：网关文件现在位于仓库根目录 `alipay.php`、`alipay/` 和 `callback/alipay.php`。
+- 已安装站点升级到此版本不需要修改数据库。
+- 手动更新时，把 `alipay.php` 和 `alipay/` 覆盖上传到 `modules/gateways/`，把 `callback/alipay.php` 覆盖上传到 `modules/gateways/callback/alipay.php`。
+- 将原来的后台语言保存下拉框改为 Risk 风格语言按钮，点击后立即切换并记住当前管理员浏览器选择。
+- 发布包元数据版本号升级到 `1.1.3`。
+
 ## 1.1.2
 
 - 优化 WHMCS 原生支付网关配置页，增加分区式配置说明。

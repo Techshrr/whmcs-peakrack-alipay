@@ -12,7 +12,7 @@ English documentation: [README.md](README.md)
 - 支持 WHMCS `Convert To For Processing = CNY`
 - 支持 USD 默认货币、CNY 支付处理
 - 支付宝返回金额校验
-- 后台配置页分区展示，并可选择中文/英文后台语言
+- 后台配置页分区展示，并提供 Risk 风格的中文/英文后台语言按钮
 - 客户前台按钮和错误提示中英文切换
 - 包含 WHMCS 网关 logo 和支付按钮图标
 
@@ -27,18 +27,12 @@ English documentation: [README.md](README.md)
 
 ## 安装
 
-仓库根目录保留说明文档，真正用于上传部署的文件放在 `whmcs-peakrack-alipay` 发布目录中：
+仓库根目录改为更适合 GitHub 浏览的浅层结构。把以下文件和目录上传到对应 WHMCS 网关路径：
 
 ```text
-whmcs-peakrack-alipay/
-  modules/
-    gateways/
-```
-
-把这个路径上传到 WHMCS 根目录：
-
-```text
-whmcs-peakrack-alipay/modules
+alipay.php            -> modules/gateways/alipay.php
+alipay/               -> modules/gateways/alipay/
+callback/alipay.php   -> modules/gateways/callback/alipay.php
 ```
 
 上传后应包含：
@@ -58,7 +52,7 @@ modules/gateways/callback/alipay.php
 
 填写以下字段：
 
-- `后台语言 / Admin Language`，选择 `zh` 或 `en` 后先保存
+- 使用配置页右上角 `中文 / English` 按钮切换后台字段语言
 - `App ID`
 - `应用私钥 / Application Private Key`
 - `支付宝公钥 / Alipay Public Key`
@@ -129,6 +123,12 @@ WHMCS 默认 `standard_cart` 订单模板的支付方式选择列表只输出支
 
 - 优化 WHMCS 支付网关后台配置 UI，增加分区说明。
 - 增加可保存的后台语言选择项，配置字段可按中文或英文显示。
+- 支付请求、回调验签和发票入账逻辑保持不变。
+
+### 1.1.3
+
+- 压平 GitHub 仓库结构，根目录直接显示网关入口文件、资源目录和 callback 目录。
+- 将原来的后台语言保存下拉框改为 Risk 风格语言按钮，点击后立即切换。
 - 支付请求、回调验签和发票入账逻辑保持不变。
 
 详细升级说明见 [UPGRADE.zh-CN.md](UPGRADE.zh-CN.md)。

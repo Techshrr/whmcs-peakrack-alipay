@@ -14,17 +14,38 @@ function alipay_MetaData()
     ];
 }
 
+function whmcs_alipay_admin_normalize_language($language): string
+{
+    return in_array((string) $language, ['zh', 'en'], true) ? (string) $language : '';
+}
+
 function whmcs_alipay_admin_language(): string
 {
+    $cookieName = 'prk_alipay_admin_lang';
+    $requestLanguage = whmcs_alipay_admin_normalize_language($_GET['prk_alipay_admin_lang'] ?? '');
+    if ($requestLanguage !== '') {
+        $_COOKIE[$cookieName] = $requestLanguage;
+        if (!headers_sent()) {
+            setcookie($cookieName, $requestLanguage, time() + 31536000, '', '', false, true);
+        }
+
+        return $requestLanguage;
+    }
+
+    $cookieLanguage = whmcs_alipay_admin_normalize_language($_COOKIE[$cookieName] ?? '');
+    if ($cookieLanguage !== '') {
+        return $cookieLanguage;
+    }
+
     try {
         if (class_exists('\WHMCS\Database\Capsule')) {
-            $value = \WHMCS\Database\Capsule::table('tblpaymentgateways')
+            $row = \WHMCS\Database\Capsule::table('tblpaymentgateways')
                 ->where('gateway', 'alipay')
-                ->where('setting', 'adminLanguage')
-                ->value('value');
-
-            if (in_array($value, ['zh', 'en'], true)) {
-                return (string) $value;
+                ->whereIn('setting', ['adminLanguage', 'adminlanguage', 'AdminLanguage'])
+                ->first(['value']);
+            $storedLanguage = whmcs_alipay_admin_normalize_language($row->value ?? '');
+            if ($storedLanguage !== '') {
+                return $storedLanguage;
             }
         }
     } catch (Throwable $e) {
@@ -38,10 +59,10 @@ function whmcs_alipay_admin_text(string $language, string $key): string
     $texts = [
         'zh' => [
             'admin_title' => 'Alipay 支付网关配置',
-            'admin_subtitle' => '用于支付宝开放平台电脑网站支付。请先保存后台语言设置，再继续填写密钥和订单参数。',
-            'admin_language' => '后台语言',
-            'admin_language_desc' => '选择 zh 或 en 后点击保存，配置项会按所选语言显示。',
-            'version_badge' => '版本 1.1.2',
+            'admin_subtitle' => '用于支付宝开放平台电脑网站支付。点击右上角语言按钮可立即切换后台配置显示语言。',
+            'version_badge' => '版本 1.1.3',
+            'language_zh' => '中文',
+            'language_en' => 'English',
             'credentials_title' => '开放平台凭据',
             'credentials_desc' => '填写支付宝开放平台应用信息。应用私钥和支付宝公钥必须来自同一个应用和同一种密钥模式。',
             'order_title' => '订单与显示',
@@ -71,10 +92,10 @@ function whmcs_alipay_admin_text(string $language, string $key): string
         ],
         'en' => [
             'admin_title' => 'Alipay Gateway Configuration',
-            'admin_subtitle' => 'Configure Alipay Open Platform PC website payment. Save the admin language first, then continue with credentials and order settings.',
-            'admin_language' => 'Admin Language',
-            'admin_language_desc' => 'Select zh or en and save. The gateway configuration labels will follow the saved language.',
-            'version_badge' => 'Version 1.1.2',
+            'admin_subtitle' => 'Configure Alipay Open Platform PC website payment. Use the language buttons in the top-right corner to switch this admin page immediately.',
+            'version_badge' => 'Version 1.1.3',
+            'language_zh' => '中文',
+            'language_en' => 'English',
             'credentials_title' => 'Open Platform Credentials',
             'credentials_desc' => 'Enter the Alipay Open Platform application credentials. The application private key and Alipay public key must belong to the same app and key mode.',
             'order_title' => 'Order and Display',
@@ -121,23 +142,44 @@ function whmcs_alipay_admin_system(string $html): array
     ];
 }
 
+function whmcs_alipay_admin_language_url(string $language): string
+{
+    $path = (string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+    $queryString = (string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_QUERY);
+    $query = [];
+    if ($queryString !== '') {
+        parse_str($queryString, $query);
+    }
+    $query['prk_alipay_admin_lang'] = $language;
+
+    return ($path !== '' ? $path : '') . '?' . http_build_query($query);
+}
+
 function whmcs_alipay_admin_intro(string $language): array
 {
     $title = whmcs_alipay_admin_e(whmcs_alipay_admin_text($language, 'admin_title'));
     $subtitle = whmcs_alipay_admin_e(whmcs_alipay_admin_text($language, 'admin_subtitle'));
     $badge = whmcs_alipay_admin_e(whmcs_alipay_admin_text($language, 'version_badge'));
+    $zhUrl = whmcs_alipay_admin_e(whmcs_alipay_admin_language_url('zh'));
+    $enUrl = whmcs_alipay_admin_e(whmcs_alipay_admin_language_url('en'));
+    $zhLabel = whmcs_alipay_admin_e(whmcs_alipay_admin_text($language, 'language_zh'));
+    $enLabel = whmcs_alipay_admin_e(whmcs_alipay_admin_text($language, 'language_en'));
 
     return whmcs_alipay_admin_system('<style>
 .prk-gw-admin{box-sizing:border-box;border:1px solid #d8e0ea;border-radius:6px;background:#fff;margin:8px 0 12px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
 .prk-gw-admin__head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:14px 16px;border-bottom:1px solid #e7edf3;background:#fbfcfe}
 .prk-gw-admin__title{margin:0 0 4px;font-size:16px;font-weight:700;color:#111827}
 .prk-gw-admin__desc{margin:0;color:#6b7280;font-size:12px;line-height:1.5}
+.prk-gw-admin__actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
 .prk-gw-admin__badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 9px;background:#eff8ff;color:#175cd3;border:1px solid #b2ddff;font-size:12px;font-weight:700;white-space:nowrap}
+.prk-gw-lang{display:inline-flex;border:1px solid #cfd8e3;border-radius:6px;background:#fff;overflow:hidden}
+.prk-gw-lang a{display:inline-flex;align-items:center;padding:6px 9px;color:#475569;text-decoration:none;font-size:12px;font-weight:700}
+.prk-gw-lang a.active{background:#2563eb;color:#fff}
 .prk-gw-section{box-sizing:border-box;border:1px solid #e7edf3;border-radius:6px;background:#fbfcfe;margin:8px 0;padding:12px 14px}
 .prk-gw-section h4{margin:0 0 4px;font-size:14px;font-weight:700;color:#111827}
 .prk-gw-section p{margin:0;color:#6b7280;font-size:12px;line-height:1.5}
 @media (max-width:700px){.prk-gw-admin__head{display:block}.prk-gw-admin__badge{margin-top:10px}}
-</style><div class="prk-gw-admin"><div class="prk-gw-admin__head"><div><h3 class="prk-gw-admin__title">' . $title . '</h3><p class="prk-gw-admin__desc">' . $subtitle . '</p></div><span class="prk-gw-admin__badge">' . $badge . '</span></div></div>');
+</style><div class="prk-gw-admin"><div class="prk-gw-admin__head"><div><h3 class="prk-gw-admin__title">' . $title . '</h3><p class="prk-gw-admin__desc">' . $subtitle . '</p></div><div class="prk-gw-admin__actions"><span class="prk-gw-admin__badge">' . $badge . '</span><div class="prk-gw-lang"><a class="' . ($language === 'zh' ? 'active' : '') . '" href="' . $zhUrl . '">' . $zhLabel . '</a><a class="' . ($language === 'en' ? 'active' : '') . '" href="' . $enUrl . '">' . $enLabel . '</a></div></div></div></div>');
 }
 
 function whmcs_alipay_admin_section(string $language, string $titleKey, string $descKey): array
@@ -159,13 +201,6 @@ function alipay_config()
             'Value' => 'Alipay (支付宝)',
         ],
         'adminUiIntro' => whmcs_alipay_admin_intro($language),
-        'adminLanguage' => [
-            'FriendlyName' => $t('admin_language'),
-            'Type' => 'dropdown',
-            'Options' => 'zh,en',
-            'Default' => $language,
-            'Description' => $t('admin_language_desc'),
-        ],
         'credentialsSection' => whmcs_alipay_admin_section($language, 'credentials_title', 'credentials_desc'),
         'appId' => [
             'FriendlyName' => $t('app_id'),
