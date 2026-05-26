@@ -4,5 +4,7 @@ Copyright 2026 PeakRack
 Official repository:
 https://github.com/Techshrr/whmcs-peakrack-alipay
 
+This package contains a WHMCS payment gateway for Alipay PC website payments and callback handling.
+
 Licensed under the Apache License, Version 2.0.
 See the LICENSE file for details.

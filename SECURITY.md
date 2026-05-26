@@ -4,16 +4,16 @@
 
 Please do not open public GitHub issues for security vulnerabilities.
 
-Report security issues to:
+Report Alipay signing, callback verification, amount-validation, or invoice-crediting issues to:
 
 security@peakrack.com
 
 Please include:
 
-- Affected project and version
-- Description of the issue
-- Steps to reproduce
-- Potential impact
+- Affected gateway version, WHMCS version, and PHP version
+- Whether the issue affects payment creation, browser return, or notify callback handling
+- Description of the issue and reproduction steps
+- Potential impact on invoice payment state or callback validation
 - Suggested mitigation, if available
 
 ## Supported versions
@@ -25,11 +25,10 @@ Please include:
 
 ## Sensitive data
 
-Do not include real customer data, production API keys, payment secrets, database credentials, WHMCS license information, identity documents, private signing keys, or server passwords in reports.
-For payment gateways, do not include real merchant IDs, private keys, platform keys, transaction IDs, callback signatures, webhook payloads, or production callback URLs in public reports.
+Do not include production App IDs, seller IDs, application private keys, Alipay public keys from production accounts, signed callback payloads, transaction IDs, real invoice numbers, customer data, WHMCS license data, or production callback URLs in public reports.
 
 ## Public issues
 
-General bugs and feature requests may be submitted through GitHub Issues.
+Installation problems, sandbox configuration questions, and documentation fixes may be submitted through GitHub Issues.
 
 Security vulnerabilities must be reported privately by email.
